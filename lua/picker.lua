@@ -61,9 +61,4 @@ M.implement_interface = function(opts)
 		:find()
 end
 
--- TODO define a user command and don't set any keybinds by default
-vim.keymap.set("n", "<leader>si", function()
-	M.implement_interface()
-end)
-
 return M
