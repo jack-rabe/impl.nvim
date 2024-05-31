@@ -9,7 +9,7 @@ local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 -- treesitter
-local parsers = require("nvim-treesitter.parsers")
+local treesitter = require("treesitter")
 
 local RETURN_MAP = {
 	string = '""',
@@ -48,6 +48,8 @@ local get_interfaces = function()
 	---@type Go_Interface[]
 	local interfaces = require("json"):decode(content)
 	local filtered_interfaces = {}
+
+	-- skip interfaces with 0 methods
 	for _, i in ipairs(interfaces) do
 		if #i.methods > 0 then
 			table.insert(filtered_interfaces, i)
@@ -56,37 +58,12 @@ local get_interfaces = function()
 	return filtered_interfaces
 end
 
--- TODO in general, handle errors better
--- TODO rework this function to make more clear
----@return string, string, integer
-local function get_node_under_cursor()
-	local cursor = vim.api.nvim_win_get_cursor(0)
-	local row, col = cursor[1] - 1, cursor[2]
-	local parser = parsers.get_parser()
-	if not parser then
-		error("Parser not available for current buffer")
-	end
-	local root = parser:parse()[1]:root()
-	local node = root:named_descendant_for_range(row, col, row, col)
-	local parent = node.parent(node)
-	local _, _, end_row, _ = parent:range()
-
-	if node then
-		local start_row, start_col, _, end_col = node:range()
-		local node_text = vim.api.nvim_buf_get_text(0, start_row, start_col, start_row, end_col, {})[1]
-		return node_text, node:type(), end_row + 2
-	else
-		error("No Treesitter node found under cursor")
-	end
-end
-
 ---@param interface Go_Interface
 ---@param node string
 ---@param with_brackets boolean
 local get_formatted_methods = function(interface, node, with_brackets)
 	local lines = {}
 	for _, method in ipairs(interface.methods) do
-		-- TODO insert after by using treesitter
 		local lower_first_char = string.lower(string.sub(node, 1, 1))
 		local formatted_method = string.format("func (%s %s) %s", lower_first_char, node, method.content)
 		if with_brackets then
@@ -105,20 +82,17 @@ end
 
 ---@param interface Go_Interface
 ---@param node string
----@param node_type string
 ---@param row_idx integer
-local add_methods = function(interface, node, node_type, row_idx)
+local add_methods = function(interface, node, row_idx)
 	local lines = get_formatted_methods(interface, node, true)
-	local cursor = vim.api.nvim_win_get_cursor(0)
-	local row_to_insert = (cursor[1] - 1) - 1
 	vim.api.nvim_buf_set_lines(0, row_idx, row_idx, false, lines)
 end
 
 M.implement_interface = function(opts)
-	local node, node_type, row_idx = get_node_under_cursor()
-	-- TODO make treesitter checks that it's a type_identifier __for a struct__
+	local node, node_type, row_idx = treesitter.get_node_under_cursor()
+	-- TODO make it be part of a type declaration
 	if node_type ~= "type_identifier" then
-		print("got node_type == " .. node_type .. ", expected type_identifier")
+		error("Treesitter node_type is " .. node_type .. ", must be type_identifier")
 		return
 	end
 
@@ -136,7 +110,6 @@ M.implement_interface = function(opts)
 				---@param entry Go_Interface
 				entry_maker = function(entry)
 					return {
-						-- TODO make this a fucntion for performance
 						value = entry,
 						display = entry.package .. "." .. entry.name,
 						ordinal = entry.package .. "." .. entry.name,
@@ -144,20 +117,19 @@ M.implement_interface = function(opts)
 				end,
 			}),
 			sorter = conf.generic_sorter(opts),
-			attach_mappings = function(prompt_bufnr, map)
+			attach_mappings = function(prompt_bufnr, _map)
 				actions.select_default:replace(function()
 					actions.close(prompt_bufnr)
 					local selected_interface = action_state.get_selected_entry().value
-					add_methods(selected_interface, node, node_type, row_idx)
+					add_methods(selected_interface, node, row_idx)
 				end)
 				return true
 			end,
 			previewer = previewers.new_buffer_previewer({
 				title = "Interface preview",
-				define_preview = function(self, entry, status)
+				define_preview = function(self, entry, _status)
 					local lines = get_formatted_methods(entry.value, node, false)
 					vim.api.nvim_buf_set_lines(self.state.bufnr, 0, -1, false, lines)
-					-- TODO fix go syntax so we can highlight it
 					require("telescope.previewers.utils").highlighter(self.state.bufnr, "go")
 				end,
 			}),
