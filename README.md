@@ -12,10 +12,16 @@ go install github.com/jack-rabe/impl@latest
 
 Then, use your preferred method or plugin manager to install [impl.nvim](https://github.com/jack-rabe/impl.nvim/).
 It looks like this for [lazy.nvim](https://github.com/folke/lazy.nvim).
+Note: `luarocks` must be installed for this plugin to function correctly
 
 ```
 -- init.lua:
-{ 'jack-rabe/impl.nvim' }
+{
+    'jack-rabe/impl.nvim',
+    dependencies = {
+      'nvim-telescope/telescope.nvim',
+    }
+}
 ```
 
 ## Demo

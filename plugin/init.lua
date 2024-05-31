@@ -1,3 +1,5 @@
+local M = {}
+
 -- telescope
 local themes = require("telescope.themes")
 local previewers = require("telescope.previewers")
@@ -8,12 +10,8 @@ local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 -- treesitter
 local parsers = require("nvim-treesitter.parsers")
--- other
-local json = require("json")
 
----@alias Go_Interface { name: string, package: string, methods: {content: string, return_type: string}[], filename: string }
-
-local return_map = {
+local RETURN_MAP = {
 	string = '""',
 	bool = "true",
 	any = "nil",
@@ -37,6 +35,8 @@ local return_map = {
 	complex128 = 0,
 }
 
+---@alias Go_Interface { name: string, package: string, methods: {content: string, return_type: string}[], filename: string }
+
 ---@return Go_Interface[]
 local get_interfaces = function()
 	local file_path = vim.fn.stdpath("data") .. "/interfaces.json"
@@ -46,10 +46,9 @@ local get_interfaces = function()
 		content = content .. line
 	end
 	---@type Go_Interface[]
-	local interfaces = json:decode(content)
+	local interfaces = require("json"):decode(content)
 	local filtered_interfaces = {}
 	for _, i in ipairs(interfaces) do
-		-- TODO - right now, I filter out interfaces with no methods
 		if #i.methods > 0 then
 			table.insert(filtered_interfaces, i)
 		end
@@ -96,7 +95,7 @@ local get_formatted_methods = function(interface, node, with_brackets)
 		table.insert(lines, formatted_method)
 		if with_brackets then
 			-- TODO lists? definitely parameter types, errors
-			local return_type = return_map[method.return_type] or ""
+			local return_type = RETURN_MAP[method.return_type] or ""
 			table.insert(lines, "    return " .. return_type)
 			table.insert(lines, "}")
 		end
@@ -115,8 +114,7 @@ local add_methods = function(interface, node, node_type, row_idx)
 	vim.api.nvim_buf_set_lines(0, row_idx, row_idx, false, lines)
 end
 
--- TODO get opts from telescope
-local go_interfaces = function(opts)
+M.implement_interface = function(opts)
 	local node, node_type, row_idx = get_node_under_cursor()
 	-- TODO make treesitter checks that it's a type_identifier __for a struct__
 	if node_type ~= "type_identifier" then
@@ -125,6 +123,11 @@ local go_interfaces = function(opts)
 	end
 
 	opts = opts or {}
+	local tmp_opts = themes.get_cursor()
+	for k, v in pairs(opts) do
+		tmp_opts[k] = v
+	end
+	opts = tmp_opts
 	pickers
 		.new(opts, {
 			prompt_title = "Interfaces",
@@ -163,5 +166,7 @@ local go_interfaces = function(opts)
 end
 
 vim.keymap.set("n", "<leader>si", function()
-	go_interfaces(themes.get_cursor())
+	M.implement_interface()
 end)
+
+return M
