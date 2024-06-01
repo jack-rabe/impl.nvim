@@ -8,10 +8,9 @@ local conf = require("telescope.config").values
 local actions = require("telescope.actions")
 local action_state = require("telescope.actions.state")
 
-local treesitter = require("treesitter")
-local interfaces = require("interfaces")
+local treesitter = require("impl.treesitter")
+local interfaces = require("impl.interfaces")
 
--- TODO allow users to pass in opts via setup function
 M.implement_interface = function(opts)
 	local node, node_type, row_idx = treesitter.get_node_under_cursor()
 	-- TODO make it be part of a type declaration
@@ -20,12 +19,7 @@ M.implement_interface = function(opts)
 		return
 	end
 
-	opts = opts or {}
-	local tmp_opts = themes.get_cursor()
-	for k, v in pairs(opts) do
-		tmp_opts[k] = v
-	end
-	opts = tmp_opts
+	opts = opts or themes.get_cursor()
 	pickers
 		.new(opts, {
 			prompt_title = "Interfaces",

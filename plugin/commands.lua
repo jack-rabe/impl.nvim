@@ -1,10 +1,8 @@
-local picker = require("picker")
-local interfaces = require("interfaces")
+local M = {}
 
--- TODO don't set any keybinds by default (only work in .go files?)
-vim.keymap.set("n", "<leader>si", function()
-	picker.implement_interface()
-end)
+local picker = require("impl.picker")
+local interfaces = require("impl.interfaces")
+local impl = require("impl")
 
 local function impl_command(args)
 	local subcommand = args.fargs[1]
@@ -26,5 +24,7 @@ vim.api.nvim_create_user_command("ImplGenerate", impl_command, {
 })
 
 vim.api.nvim_create_user_command("ImplSearch", function()
-	picker.implement_interface()
+	picker.implement_interface(impl.get_config())
 end, {})
+
+return M
