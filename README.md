@@ -32,14 +32,15 @@ It looks like this for [lazy.nvim](https://github.com/folke/lazy.nvim).
 - Run the command `ImplGenerate stdlib` to generate a list of all the interfaces in the standard library.
 - Run the command `ImplGenerate project` to generate a list of all the interfaces in your current git repo.
 - Run the command `ImplSearch` while your cursor is on top of a type definition to fuzzy find a list of available interfaces to implement. The necessary methods will be added once an interface is selected.
-  - Note: it is possible to change the appearance of the [telescope](https://github.com/nvim-telescope/telescope.nvim) finder by calling `impl.setup` ([lazy.nvim](https://github.com/folke/lazy.nvim) will do this automatically if you specify opts).
+  - Note: it is possible to change the appearance of the [telescope](https://github.com/nvim-telescope/telescope.nvim) finder by calling `impl.setup`.
 ```lua
 require('impl').setup({
   layout_strategy = 'vertical',
   layout_config = { width = 0.5 }
 })
 ```
+ [lazy.nvim](https://github.com/folke/lazy.nvim) will call `setup` automatically if you specify opts.
 
 ## Demo
 
-https://github.com/jack-rabe/impl.nvim/assets/76982748/b8c0a82a-aa17-4ca8-bbd0-197c3dc42573
+https://github.com/jack-rabe/impl.nvim/assets/76982748/04610721-f426-46de-a635-f974c8d35e05
