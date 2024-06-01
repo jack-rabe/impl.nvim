@@ -29,8 +29,9 @@ It looks like this for [lazy.nvim](https://github.com/folke/lazy.nvim).
 ```
 
 ## Usage
-- Run the command `ImplGenerate` to generate a list of all the interfaces in the standard library
-- Run the command `ImplSearch` while your cursor is on top of a type definition to fuzzy find a list of available interfaces to implement. The necessary methods will be added once an interface is selected
+- Run the command `ImplGenerate stdlib` to generate a list of all the interfaces in the standard library.
+- Run the command `ImplGenerate project` to generate a list of all the interfaces in your current git repo.
+- Run the command `ImplSearch` while your cursor is on top of a type definition to fuzzy find a list of available interfaces to implement. The necessary methods will be added once an interface is selected.
 
 ## Demo
 

@@ -11,7 +11,7 @@ local action_state = require("telescope.actions.state")
 local treesitter = require("treesitter")
 local interfaces = require("interfaces")
 
--- TOOD allow users to pass in opts via setup function
+-- TODO allow users to pass in opts via setup function
 M.implement_interface = function(opts)
 	local node, node_type, row_idx = treesitter.get_node_under_cursor()
 	-- TODO make it be part of a type declaration
