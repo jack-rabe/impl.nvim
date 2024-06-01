@@ -87,9 +87,11 @@ M.get_formatted_methods = function(interface, node, with_brackets)
 		end
 		table.insert(lines, formatted_method)
 		if with_brackets then
-			-- TODO lists? definitely parameter types, errors
-			local return_type = RETURN_MAP[method.return_type] or ""
-			table.insert(lines, "    return " .. return_type)
+			local has_return = method.return_type ~= ""
+			if has_return then
+				local return_type = RETURN_MAP[method.return_type] or "nil"
+				table.insert(lines, "    return " .. return_type)
+			end
 			table.insert(lines, "}")
 		end
 	end

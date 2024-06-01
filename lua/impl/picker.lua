@@ -13,7 +13,6 @@ local interfaces = require("impl.interfaces")
 
 M.implement_interface = function(opts)
 	local node, node_type, row_idx = treesitter.get_node_under_cursor()
-	-- TODO make it be part of a type declaration
 	if node_type ~= "type_identifier" then
 		error("Treesitter node_type is " .. node_type .. ", must be type_identifier")
 		return
