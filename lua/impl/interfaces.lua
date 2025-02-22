@@ -41,7 +41,7 @@ local get_interfaces_for_path = function(path)
 		content = content .. line
 	end
 	---@type Go_Interface[]
-	local interfaces = require("json"):decode(content)
+	local interfaces = vim.fn.json_decode(content)
 
 	for _, i in ipairs(interfaces) do
 		if #i.methods > 0 then
